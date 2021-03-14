@@ -15,13 +15,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Configure header file
 configure_file(Config.h.in Config.h)
 
+include(cmake/sourcelist.cmake)
 # Add files for the project
-add_executable(${APP_NAME} src/gf.cpp src/glad.c)
+add_executable(${APP_NAME} ${sources})
 
 target_link_libraries(${APP_NAME} D:/Developpement/GoblinFactory/libs/glfw3.dll)
 
-# Add source directory
-add_subdirectory(src)
 
 # Add the include directory
 target_include_directories( ${APP_NAME} PUBLIC
