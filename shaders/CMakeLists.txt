@@ -1,0 +1,3 @@
+FILE(COPY shader2D.vs DESTINATION "${CMAKE_BINARY_DIR}/shaders/")
+FILE(COPY shader2D.fs DESTINATION "${CMAKE_BINARY_DIR}/shaders/")
+

@@ -3,7 +3,8 @@
 GFWindow::GFWindow(int height,
                    int width,
                    const char* title,
-                   GFColor* bgColor)
+                   GFColor* bgColor,
+                   bool canResizeViewPort)
   : Window(height, width, title),
     _bgColor(bgColor)
 {}

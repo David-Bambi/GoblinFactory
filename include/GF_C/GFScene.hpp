@@ -2,17 +2,21 @@
 #define GFSCENE_HPP
 
 #include <vector>
+#include <map>
 
+// GF library 
 #include <GF_C/GFDraw_I.hpp>
+#include <GF_C/GFShader.hpp>
+#include <GF_C/GFShaderList.hpp>
 
-class GFScene : public GFDraw_I
+class GFScene
 {
-private :
-  std::vector<GFDraw_I*>* DrawingObjects = new std::vector<GFDraw_I*>();
+protected :
+  std::map<unsigned int, std::vector<GFDraw_I*>> DrawingObjects;
+  
 public :
-  GFScene();
-  void Add(GFDraw_I* object);
-  virtual void Draw();
+  void Draw();
+  virtual void Build() = 0;
 };
 
 

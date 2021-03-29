@@ -1,0 +1,2 @@
+FILE(COPY wall.jpg DESTINATION "${CMAKE_BINARY_DIR}/textures/")
+

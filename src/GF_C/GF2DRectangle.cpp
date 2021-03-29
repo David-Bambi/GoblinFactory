@@ -1,67 +1,33 @@
 #include <GF_C/GF2DRectangle.hpp>
 
-GF2DRectangle::GF2DRectangle()
+
+GF2DRectangle::GF2DRectangle(unsigned int shaderprogram,
+                             GFColor color,
+                             unsigned int texture,
+                             unsigned int usage)
 {
-  float verticesTmp [] =
-    {
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
-    };
+   // Set the color
+  this->_red_v1 = color.Red();
+  this->_red_v2 = color.Red();
+  this->_red_v3 = color.Red();
+  this->_red_v4 = color.Red();
 
-  for(int i = 0; i < 12; i++)
-   this->vertices[i] = verticesTmp[i];
+  this->_green_v1 = color.Green();
+  this->_green_v2 = color.Green();
+  this->_green_v3 = color.Green();
+  this->_green_v4 = color.Green();
 
-  this->usage = GL_STATIC_DRAW;
-  
+  this->_blue_v1 = color.Blue();
+  this->_blue_v2 = color.Blue();
+  this->_blue_v3 = color.Blue();
+  this->_blue_v4 = color.Blue();
+
+  this->_shaderprogram = shaderprogram;
+  this->_tex = texture;
+  this->T = glm::mat4(1.0f);
+  this->_usage = usage;  
   this->PrepareRendering();
 };
-
-GF2DRectangle::GF2DRectangle(float vertices[],
-                             unsigned int usage)
-{
- for(int i = 0; i < 12; i++)
-   this->vertices[i] = vertices[i];
-
- this->usage = usage;
- 
- this->PrepareRendering();
-}
-
-GF2DRectangle::GF2DRectangle(Point2D pt1, // top left
-                             Point2D pt2, // top right
-                             Point2D pt3, // bottom left
-                             Point2D pt4, // bottom right
-                             unsigned int usage)
-{
-  // Point 1 
-  this->vertices[0] = pt1.x;
-  this->vertices[1] = pt1.y;
-  this->vertices[2] = 0.0f;
-
-  // Point 2
-  this->vertices[3] = pt2.x;
-  this->vertices[4] = pt2.y;
-  this->vertices[5] = 0.0f;
-
-  // Point 3
-  this->vertices[6] = pt3.x;
-  this->vertices[7] = pt3.y;
-  this->vertices[8] = 0.0f;
-
-  // Point 4
-  this->vertices[9] = pt4.x;
-  this->vertices[10] = pt4.y;
-  this->vertices[11] = 0.0f;
-
- for(int i = 0; i < 12; i++)
-   this->vertices[i] = vertices[i];
-
- this->usage = usage;
- 
- this->PrepareRendering();
-}
 
 void GF2DRectangle::PrepareRendering()
 {
@@ -72,33 +38,63 @@ void GF2DRectangle::PrepareRendering()
   glGenBuffers(1, &EBO);
 
   glBindVertexArray(VAO);
+
+  float vertices [] =
+    {
+     -1.0f,  1.0f, 0.0f,  /*top right*/   this->_red_v1, this->_green_v1, this->_blue_v1 , 0.0f, 1.0f,
+     1.0f, 1.0f, 0.0f,  /*top left*/   this->_red_v2, this->_green_v2, this->_blue_v2 , 1.0f, 1.0f,
+     -1.0f, -1.0f, 0.0f,  /*bottom right*/ this->_red_v3, this->_green_v3, this->_blue_v3 , 0.0f, 0.0f,
+     1.0f,  -1.0f, 0.0f,   /*bottom left*/ this->_red_v4, this->_green_v4, this->_blue_v4 , 1.0f, 0.0f
+    };
+
+  unsigned int indices[] = {0, 3, 2,   // first triangle
+                            0, 3, 1};  // second triangle
   
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER,
-               sizeof(this->vertices),
-               this->vertices,
-               GL_STATIC_DRAW);
+               sizeof(vertices),
+               vertices,
+               this->_usage);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               sizeof(this->indices),
-               this->indices,
-               this->usage); 
+               sizeof(indices),
+               indices,
+               this->_usage); 
   
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6* sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  this->vbo = VBO;
-  this->vao = VAO;
-  this->ebo = EBO;
+  this->_vbo = VBO;
+  this->_vao = VAO;
+  this->_ebo = EBO;
 }
 
 void GF2DRectangle::Draw()
 {
-  glBindVertexArray(this->vao);
+   if(this->_tex > 0)
+    {
+      glBindTexture(GL_TEXTURE_2D, this->_tex);
+      glUniform1i(glGetUniformLocation(this->_shaderprogram, "hasTex"), (int)true);
+    }
+  else
+    {
+      glUniform1i(glGetUniformLocation(this->_shaderprogram, "hasTex"), (int)false);
+    }
+
+  unsigned int transformLoc = glGetUniformLocation(this->_shaderprogram, "transform");
+  glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(this->T));
+    
+  glBindVertexArray(this->_vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
 }

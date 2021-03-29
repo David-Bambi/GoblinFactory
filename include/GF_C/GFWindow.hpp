@@ -12,7 +12,8 @@ public:
   GFWindow(int height,
            int width,
            const char* title,
-           GFColor* bgColor);
+           GFColor* bgColor,
+           bool canResizeViewPort = true);
   virtual void Draw();
   
   GFColor* GetBgColor();

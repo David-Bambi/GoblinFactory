@@ -14,7 +14,16 @@ public:
   float Red();
   float Green();
   float Blue();
-  float Opacity();
+  float Opacity();  
 };
+
+namespace Color
+{
+  const GFColor Black = GFColor(0.0f, 0.0f, 0.0f, 1.0f);
+  const GFColor Red   = GFColor(1.0f, 0.0f, 0.0f, 1.0f);
+  const GFColor Green = GFColor(0.0f, 1.0f, 0.0f, 1.0f);
+  const GFColor Blue  = GFColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+}
 
 #endif
